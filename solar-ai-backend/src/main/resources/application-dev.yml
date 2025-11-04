@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: dev   # when this file is loaded directly in IntelliJ, it sets itself active
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/solar_ai
+  kafka:
+    bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    org.springframework.data.mongodb: INFO
+    org.apache.kafka: INFO

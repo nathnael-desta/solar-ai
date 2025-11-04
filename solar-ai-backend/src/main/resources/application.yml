@@ -1,8 +1,42 @@
+server:
+  port: 8080   # where your Spring app listens
+
+spring:
+  application:
+    name: solar-ai-backend
+  jackson:
+    # make date/time JSON nice (ISO-8601) instead of raw timestamps
+    serialization:
+      write-dates-as-timestamps: false
+
+  # --- MongoDB ---
+  data:
+    mongodb:
+      # URI format: mongodb://<host>:<port>/<dbName>
+      # We map Docker's mongo 27017 -> localhost:27017
+      uri: mongodb://localhost:27017/solar_ai
+
+  # --- Kafka ---
+  kafka:
+    # This must match what your Kafka container advertises.
+    # In your compose, we expose PLAINTEXT://localhost:9092
+    bootstrap-servers: localhost:9092
+
+    # Defaults you’ll use soon for consumers. We’ll add more in Kafka steps.
+    consumer:
+      group-id: summary-service-group
+      # If a consumer starts with no committed offsets, start from latest messages
+      auto-offset-reset: latest
+
 management:
   endpoints:
     web:
       exposure:
+        # expose only the useful/safe Actuator endpoints publicly for dev
         include: health,info
   endpoint:
     health:
       show-details: always
+logging:
+  level:
+    root: INFO
