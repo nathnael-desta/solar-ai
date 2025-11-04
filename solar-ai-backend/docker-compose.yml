@@ -3,7 +3,6 @@ networks:
     driver: bridge
 
 services:
-  # --- MongoDB for Spring Boot ---
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -14,49 +13,50 @@ services:
     networks:
       - kafka-net
 
-  # --- Kafka (KRaft mode, single broker, no ZooKeeper) ---
   kafka:
     image: confluentinc/cp-kafka:7.8.0
     container_name: kafka
     hostname: kafka
     ports:
-      - "9092:9092"   # client port
-      - "9093:9093"   # controller port (internal)
+      - "9092:9092"    # internal (Docker network) listener, used by other containers
+      - "29092:29092"  # external (host) listener, used by apps on your laptop
     environment:
-      # KRaft single-node settings
+      # KRaft single-node
       KAFKA_NODE_ID: 1
-      KAFKA_BROKER_ID: 1
       KAFKA_PROCESS_ROLES: "broker,controller"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-      KAFKA_LISTENERS: "PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093"
-      # Advertise localhost so your host apps (Spring Boot) can connect
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+
+      # Listeners: one for docker network, one for host; plus controller
+      KAFKA_LISTENERS: "PLAINTEXT_INTERNAL://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT_INTERNAL://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
-      # Dev-friendly replication defaults (single broker)
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT_INTERNAL"
+
+      CLUSTER_ID: "J9GlYrT5Qi6xWGdEa3Wvnw"
+      KAFKA_CLUSTER_ID: "J9GlYrT5Qi6xWGdEa3Wvnw"
+
+      # Dev-friendly replication
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
-      # Speed up consumer group startup
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      # Optional but nice for clean cluster identity
-      CLUSTER_ID: "devClusterId-aaaaaaaaaaaaaa"
+
+
+
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
       - kafka-net
-    # If you're on Apple Silicon and run into issues, uncomment:
-    # platform: linux/amd64
 
-  # --- (Optional) Kafka UI ---
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - "6080:6080"
+      - "6080:8080"  # expose UI on localhost:6080
     environment:
       KAFKA_CLUSTERS_0_NAME: local
+      # UI runs inside Docker → must use the INTERNAL listener
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     depends_on:
       - kafka

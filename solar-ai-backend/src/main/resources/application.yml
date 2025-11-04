@@ -20,7 +20,7 @@ spring:
   kafka:
     # This must match what your Kafka container advertises.
     # In your compose, we expose PLAINTEXT://localhost:9092
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:29092
 
     # Defaults you’ll use soon for consumers. We’ll add more in Kafka steps.
     consumer:
