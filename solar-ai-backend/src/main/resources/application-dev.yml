@@ -5,6 +5,7 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/solar_ai
+      auto-index-creation: true
   kafka:
     bootstrap-servers: localhost:29092
 
