@@ -40,6 +40,12 @@ spring:
         delivery.timeout.ms: 120000
         request.timeout.ms: 30000
 
+    topics:
+      summary-requests: summary_requests
+      summary-results: summary_results  # if you add a results topic later
+      consumer:
+        concurrency: 1
+
     listener:
       # “record” = process/commit per record with record listeners (safe/default for now)
       ack-mode: record
