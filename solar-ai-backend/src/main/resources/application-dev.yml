@@ -9,6 +9,15 @@ spring:
   kafka:
     bootstrap-servers: localhost:29092
 
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all            # wait for broker ack; safer in dev
+      retries: 3
+      properties:
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+
 logging:
   level:
     org.springframework.data.mongodb: INFO

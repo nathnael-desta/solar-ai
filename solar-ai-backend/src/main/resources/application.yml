@@ -27,6 +27,22 @@ spring:
       group-id: summary-service-group
       # If a consumer starts with no committed offsets, start from latest messages
       auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all            # wait for broker ack; safer in dev
+      retries: 3
+      properties:
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+
+    listener:
+      # “record” = process/commit per record with record listeners (safe/default for now)
+      ack-mode: record
 
 management:
   endpoints:
